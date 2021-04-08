@@ -1,11 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <Company>Repos Software</Company>
-    <Authors>Julian Augusto Ruiz Martinez</Authors>
-    <AssemblyVersion>0.9.0.0</AssemblyVersion>
-    <FileVersion>0.9.0.0</FileVersion>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="TelRecSDK.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>
