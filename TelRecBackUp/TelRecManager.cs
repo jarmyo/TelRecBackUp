@@ -15,7 +15,7 @@ namespace Repos.TelRecBackUp
         private static string RecordersUser = "Userfoo";
         private static string RecordersPassword = "PasswordBar";
         private static List<RecorderItem> Recorders = new List<RecorderItem>();
-        private const int MinutesToCheck = 1; //change this line according to your needs
+        private const int MinutesToCheck = 10; //change this line according to your needs
         private const bool StartCheckInStart = true; //change this line according to your needs
         private const int MaxChannels = 4; //this is for NAR6100
         private const string StoreFolder = @"F:\";
@@ -102,7 +102,7 @@ namespace Repos.TelRecBackUp
                 password = AllRecordersHasTheSamePassword ? RecordersPassword : password;
 
                 if (TelRecInterface.Login(recorder.TelRecId, ipAddress, 6066,
-                                         user, password, false) == TelRecInterface.TelRecErrno.Succeed)
+                                         user, password, true) == TelRecInterface.TelRecErrno.Succeed)
                 {
                     Debug.WriteLine($"Recorder Connected! [{ipAddress}]");
                     recorder.ConnectStatus = TelRecInterface.ConnectStatusType.Connected;
@@ -239,12 +239,31 @@ namespace Repos.TelRecBackUp
                                                                     AudioFileSize = AudioLength;
                                                                     AudioFileBuffer = new byte[AudioFileSize];
                                                                     Debug.Write(" size " + (AudioFileSize * 0.000001) + "MB");
+
+                                                                    if (AudioFileSize == 0)
+                                                                    {
+                                                                        Debug.WriteLine(" - skipping, destroy ");
+                                                                        TelRecInterface.TelRecRecordDeleteItem Item = new TelRecInterface.TelRecRecordDeleteItem()
+                                                                        {
+                                                                            HasWavFile = false,
+                                                                            Channel = channel - 1,
+                                                                            Day = __day,
+                                                                            Hour = __hour,
+                                                                            Minutes = __minutes,
+                                                                            Month = __month,
+                                                                            Year = __year,
+                                                                            Seconds = __seconds,
+                                                                            Offset = currentRecord_
+                                                                        };
+                                                                        Errno = TelRecInterface.DeleteRecord(_recorder.TelRecId, Item);
+                                                                        var ee1 = TelRecInterface.RemoveFile(_recorder.TelRecId, $"/RecordFiles/{_folderName}/{dataname}.wav");
+                                                                    }
+
                                                                 }
                                                                 else
                                                                 {
                                                                     Array.Copy(AudioData, 0, AudioFileBuffer, AudioDownloadCount, AudioLength);
                                                                     AudioDownloadCount += AudioLength;
-
                                                                     if (AudioDownloadCount == AudioFileSize)
                                                                     {
 
@@ -289,9 +308,28 @@ namespace Repos.TelRecBackUp
 
                                                                 Debug.WriteLine(" - DESTROY!");
                                                             }
-                                                            else if (Errno != TelRecInterface.TelRecErrno.Succeed)
+
+                                                            else if (Errno == TelRecInterface.TelRecErrno.TimeOut)
                                                             {
-                                                                Console.WriteLine("!!");
+                                                                if (!Directory.Exists(StoreFolder + _recorder.Serial + @"\" + _folderName))
+                                                                {
+                                                                    Directory.CreateDirectory(StoreFolder + _recorder.Serial + @"\" + _folderName);
+                                                                }
+                                                                Debug.Write(" - writing ");
+                                                                File.WriteAllBytes(_localAudioFileName, AudioFileBuffer);
+                                                                Debug.WriteLine(" - OK!");
+                                                                Errno = TelRecInterface.EditRecordNotes(_recorder.TelRecId, currentRecord_, __year, __month, __day, channel - 1, "saved");
+                                                                var callitem = new CallItem(__DateTime, channel, __lenght);
+                                                                callitem.IdRecorder = _recorder.TelRecId;
+                                                                callitem.IndexRecorder = indexer;
+                                                                callitem.Url = _recorder.Serial + "/" + _folderName + "/" + dataname;
+                                                                callitem.RecordOffset = currentRecord_;
+                                                                callitem.LocalPath = $"/RecordFiles/{_folderName}/{dataname}.wav";
+                                                                newCallslist.Add(callitem);
+                                                                OnNewRecordFound?.Invoke(callitem, true);
+
+                                                                Debug.WriteLine(" - TIMEOUT.");
+
                                                             }
                                                         }
 
