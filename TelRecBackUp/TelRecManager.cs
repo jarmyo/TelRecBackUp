@@ -55,7 +55,7 @@ namespace Repos.TelRecBackUp
             var _timerSync = new Timer
             {
 #if DEBUG
-                Interval = 10000,
+                Interval = 60000,
 #else
                 Interval = MinutesToCheck * 60000, 
 #endif
