@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace Repos.TelRecBackUp
@@ -104,6 +105,8 @@ namespace Repos.TelRecBackUp
             {
                 user = AllRecordersHasTheSamePassword ? RecordersUser : user;
                 password = AllRecordersHasTheSamePassword ? RecordersPassword : password;
+
+
 
                 if (TelRecInterface.Login(recorder.TelRecId, ipAddress, 6066,
                                          user, password, true) == TelRecInterface.TelRecErrno.Succeed)
@@ -228,107 +231,107 @@ namespace Repos.TelRecBackUp
                                                         }
                                                         else
                                                         {
-                                                            Console.Write("Download file: " + _localAudioFileName);
-                                                            Errno = TelRecInterface.DownloadFile(_recorder.TelRecId, $"/RecordFiles/{_folderName}/{dataname}.wav",
-                                                            (int Device, byte[] AudioData, int AudioLength) =>
-                                                            {
-                                                                if (AudioData == null)
-                                                                {
-                                                                    AudioFileSize = AudioLength;
-                                                                    AudioFileBuffer = new byte[AudioFileSize];
-                                                                    Console.Write(" size " + (AudioFileSize * 0.000001) + "MB");
+                                                            //Console.Write("Download file: " + _localAudioFileName);
+                                                            //Errno = TelRecInterface.DownloadFile(_recorder.TelRecId, $"/RecordFiles/{_folderName}/{dataname}.wav",
+                                                            //(int Device, byte[] AudioData, int AudioLength) =>
+                                                            //{
+                                                            //    if (AudioData == null)
+                                                            //    {
+                                                            //        AudioFileSize = AudioLength;
+                                                            //        AudioFileBuffer = new byte[AudioFileSize];
+                                                            //        Console.Write(" size " + (AudioFileSize * 0.000001) + "MB");
 
-                                                                    if (AudioFileSize == 0)
-                                                                    {
-                                                                        Console.WriteLine(" - skipping, destroy ");
-                                                                        TelRecInterface.TelRecRecordDeleteItem Item = new TelRecInterface.TelRecRecordDeleteItem()
-                                                                        {
-                                                                            HasWavFile = false,
-                                                                            Channel = channel - 1,
-                                                                            Day = __day,
-                                                                            Hour = __hour,
-                                                                            Minutes = __minutes,
-                                                                            Month = __month,
-                                                                            Year = __year,
-                                                                            Seconds = __seconds,
-                                                                            Offset = currentRecord_
-                                                                        };
-                                                                       // Errno = TelRecInterface.DeleteRecord(_recorder.TelRecId, Item);
-                                                                       // var ee1 = TelRecInterface.RemoveFile(_recorder.TelRecId, $"/RecordFiles/{_folderName}/{dataname}.wav");
-                                                                    }
+                                                            //        if (AudioFileSize == 0)
+                                                            //        {
+                                                            //            Console.WriteLine(" - skipping, destroy ");
+                                                            //            TelRecInterface.TelRecRecordDeleteItem Item = new TelRecInterface.TelRecRecordDeleteItem()
+                                                            //            {
+                                                            //                HasWavFile = false,
+                                                            //                Channel = channel - 1,
+                                                            //                Day = __day,
+                                                            //                Hour = __hour,
+                                                            //                Minutes = __minutes,
+                                                            //                Month = __month,
+                                                            //                Year = __year,
+                                                            //                Seconds = __seconds,
+                                                            //                Offset = currentRecord_
+                                                            //            };
+                                                            //           // Errno = TelRecInterface.DeleteRecord(_recorder.TelRecId, Item);
+                                                            //           // var ee1 = TelRecInterface.RemoveFile(_recorder.TelRecId, $"/RecordFiles/{_folderName}/{dataname}.wav");
+                                                            //        }
 
-                                                                }
-                                                                else
-                                                                {
-                                                                    Array.Copy(AudioData, 0, AudioFileBuffer, AudioDownloadCount, AudioLength);
-                                                                    AudioDownloadCount += AudioLength;
-                                                                    if (AudioDownloadCount == AudioFileSize)
-                                                                    {
+                                                            //    }
+                                                            //    else
+                                                            //    {
+                                                            //        Array.Copy(AudioData, 0, AudioFileBuffer, AudioDownloadCount, AudioLength);
+                                                            //        AudioDownloadCount += AudioLength;
+                                                            //        if (AudioDownloadCount == AudioFileSize)
+                                                            //        {
 
-                                                                        if (!Directory.Exists(StoreFolder + _recorder.Serial + @"\" + _folderName))
-                                                                        {
-                                                                            Directory.CreateDirectory(StoreFolder + _recorder.Serial + @"\" + _folderName);
-                                                                        }
-                                                                        Console.Write(" - writing ");
-                                                                        File.WriteAllBytes(_localAudioFileName, AudioFileBuffer);
-                                                                        Console.WriteLine(" - OK!");
-                                                                        Errno = TelRecInterface.EditRecordNotes(_recorder.TelRecId, currentRecord_, __year, __month, __day, channel - 1, "saved");
-                                                                        var callitem = new CallItem(__DateTime, channel, __lenght);
-                                                                        callitem.IdRecorder = _recorder.TelRecId;
-                                                                        callitem.IndexRecorder = indexer;
-                                                                        callitem.Url = _recorder.Serial + "/" + _folderName + "/" + dataname;
-                                                                        callitem.RecordOffset = currentRecord_;
-                                                                        callitem.LocalPath = $"/RecordFiles/{_folderName}/{dataname}.wav";
-                                                                        newCallslist.Add(callitem);
-                                                                        OnNewRecordFound?.Invoke(callitem, true);
-                                                                        //Delete from device to free space
-                                                                    }
+                                                            //            if (!Directory.Exists(StoreFolder + _recorder.Serial + @"\" + _folderName))
+                                                            //            {
+                                                            //                Directory.CreateDirectory(StoreFolder + _recorder.Serial + @"\" + _folderName);
+                                                            //            }
+                                                            //            Console.Write(" - writing ");
+                                                            //            File.WriteAllBytes(_localAudioFileName, AudioFileBuffer);
+                                                            //            Console.WriteLine(" - OK!");
+                                                            //            Errno = TelRecInterface.EditRecordNotes(_recorder.TelRecId, currentRecord_, __year, __month, __day, channel - 1, "saved");
+                                                            //            var callitem = new CallItem(__DateTime, channel, __lenght);
+                                                            //            callitem.IdRecorder = _recorder.TelRecId;
+                                                            //            callitem.IndexRecorder = indexer;
+                                                            //            callitem.Url = _recorder.Serial + "/" + _folderName + "/" + dataname;
+                                                            //            callitem.RecordOffset = currentRecord_;
+                                                            //            callitem.LocalPath = $"/RecordFiles/{_folderName}/{dataname}.wav";
+                                                            //            newCallslist.Add(callitem);
+                                                            //            OnNewRecordFound?.Invoke(callitem, true);
+                                                            //            //Delete from device to free space
+                                                            //        }
 
-                                                                }
-                                                                return false;//return true will stop download
-                                                            });
+                                                            //    }
+                                                            //    return false;//return true will stop download
+                                                            //});
 
-                                                            if (Errno == TelRecInterface.TelRecErrno.FileNotExist)
-                                                            {
-                                                                TelRecInterface.TelRecRecordDeleteItem Item = new TelRecInterface.TelRecRecordDeleteItem()
-                                                                {
-                                                                    HasWavFile = false,
-                                                                    Channel = channel - 1,
-                                                                    Day = __day,
-                                                                    Hour = __hour,
-                                                                    Minutes = __minutes,
-                                                                    Month = __month,
-                                                                    Year = __year,
-                                                                    Seconds = __seconds,
-                                                                    Offset = currentRecord_
-                                                                };
-                                                                //Errno = TelRecInterface.DeleteRecord(_recorder.TelRecId, Item);
+                                                            //if (Errno == TelRecInterface.TelRecErrno.FileNotExist)
+                                                            //{
+                                                            //    TelRecInterface.TelRecRecordDeleteItem Item = new TelRecInterface.TelRecRecordDeleteItem()
+                                                            //    {
+                                                            //        HasWavFile = false,
+                                                            //        Channel = channel - 1,
+                                                            //        Day = __day,
+                                                            //        Hour = __hour,
+                                                            //        Minutes = __minutes,
+                                                            //        Month = __month,
+                                                            //        Year = __year,
+                                                            //        Seconds = __seconds,
+                                                            //        Offset = currentRecord_
+                                                            //    };
+                                                            //    //Errno = TelRecInterface.DeleteRecord(_recorder.TelRecId, Item);
 
-                                                                Console.WriteLine(" - DESTROY!");
-                                                            }
+                                                            //    Console.WriteLine(" - DESTROY!");
+                                                            //}
 
-                                                            else if (Errno == TelRecInterface.TelRecErrno.TimeOut)
-                                                            {
-                                                                if (!Directory.Exists(StoreFolder + _recorder.Serial + @"\" + _folderName))
-                                                                {
-                                                                    Directory.CreateDirectory(StoreFolder + _recorder.Serial + @"\" + _folderName);
-                                                                }
-                                                                Console.Write(" - writing ");
-                                                                File.WriteAllBytes(_localAudioFileName, AudioFileBuffer);
-                                                                Console.WriteLine(" - OK!");
-                                                                Errno = TelRecInterface.EditRecordNotes(_recorder.TelRecId, currentRecord_, __year, __month, __day, channel - 1, "saved");
-                                                                var callitem = new CallItem(__DateTime, channel, __lenght);
-                                                                callitem.IdRecorder = _recorder.TelRecId;
-                                                                callitem.IndexRecorder = indexer;
-                                                                callitem.Url = _recorder.Serial + "/" + _folderName + "/" + dataname;
-                                                                callitem.RecordOffset = currentRecord_;
-                                                                callitem.LocalPath = $"/RecordFiles/{_folderName}/{dataname}.wav";
-                                                                newCallslist.Add(callitem);
-                                                                OnNewRecordFound?.Invoke(callitem, true);
+                                                            //else if (Errno == TelRecInterface.TelRecErrno.TimeOut)
+                                                            //{
+                                                            //    if (!Directory.Exists(StoreFolder + _recorder.Serial + @"\" + _folderName))
+                                                            //    {
+                                                            //        Directory.CreateDirectory(StoreFolder + _recorder.Serial + @"\" + _folderName);
+                                                            //    }
+                                                            //    Console.Write(" - writing ");
+                                                            //    File.WriteAllBytes(_localAudioFileName, AudioFileBuffer);
+                                                            //    Console.WriteLine(" - OK!");
+                                                            //    Errno = TelRecInterface.EditRecordNotes(_recorder.TelRecId, currentRecord_, __year, __month, __day, channel - 1, "saved");
+                                                            //    var callitem = new CallItem(__DateTime, channel, __lenght);
+                                                            //    callitem.IdRecorder = _recorder.TelRecId;
+                                                            //    callitem.IndexRecorder = indexer;
+                                                            //    callitem.Url = _recorder.Serial + "/" + _folderName + "/" + dataname;
+                                                            //    callitem.RecordOffset = currentRecord_;
+                                                            //    callitem.LocalPath = $"/RecordFiles/{_folderName}/{dataname}.wav";
+                                                            //    newCallslist.Add(callitem);
+                                                            //    OnNewRecordFound?.Invoke(callitem, true);
 
-                                                                Console.WriteLine(" - TIMEOUT.");
+                                                            //    Console.WriteLine(" - TIMEOUT.");
 
-                                                            }
+                                                            //}
                                                         }
 
                                                     }
@@ -336,19 +339,19 @@ namespace Repos.TelRecBackUp
                                                     {
 
 
-                                                        Console.WriteLine($" Deleting {_folderName}/{dataname} --> " + __lenght);
-                                                        TelRecInterface.TelRecRecordDeleteItem Item = new TelRecInterface.TelRecRecordDeleteItem()
-                                                        {
-                                                            HasWavFile = false,
-                                                            Channel = channel - 1,
-                                                            Day = __day,
-                                                            Hour = __hour,
-                                                            Minutes = __minutes,
-                                                            Month = __month,
-                                                            Year = __year,
-                                                            Seconds = __seconds,
-                                                            Offset = currentRecord_
-                                                        };
+                                                        //Console.WriteLine($" Deleting {_folderName}/{dataname} --> " + __lenght);
+                                                        //TelRecInterface.TelRecRecordDeleteItem Item = new TelRecInterface.TelRecRecordDeleteItem()
+                                                        //{
+                                                        //    HasWavFile = false,
+                                                        //    Channel = channel - 1,
+                                                        //    Day = __day,
+                                                        //    Hour = __hour,
+                                                        //    Minutes = __minutes,
+                                                        //    Month = __month,
+                                                        //    Year = __year,
+                                                        //    Seconds = __seconds,
+                                                        //    Offset = currentRecord_
+                                                        //};
 
                                                         //Errno = TelRecInterface.DeleteRecord(_recorder.TelRecId, Item);
                                                         //Errno = TelRecInterface.RemoveFile(_recorder.TelRecId, $"/RecordFiles/{_folderName}/{dataname}.wav");
